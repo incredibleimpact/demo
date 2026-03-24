@@ -1,0 +1,62 @@
+server:
+  port: 8081
+  tomcat:
+    threads:
+      max: 400 #处理请求线程数
+      min-spare: 50
+    accept-count: 1000 # 线程满时等待队列
+    max-connections: 8192 # 最大连接数
+    connection-timeout: 20000
+spring:
+  rabbitmq: # mq/exchange config
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    connection-timeout: 1s
+
+    publisher-confirm-type: correlated #publisher - exchange
+    publisher-returns: true # publisher - (exhange) - queue 开启回调,可以设置回调行为
+
+    template:
+      mandatory: true # 若消息路由失败则触发returns回调
+      retry:
+        enabled: true
+        initial-interval: 1000ms
+        multiplier: 1 # curInterval=preInterval*multiplier
+        max-attempts: 3
+    listener: # consumer config
+      simple:
+        prefetch: 10
+        acknowledge-mode: manual # none,manual,auto(business ok ->ack ; business exception ->nack ; message exception-> reject)
+        retry:
+          enabled: false
+
+  application:
+    name: test
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/demo?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      lettuce:
+        pool:
+          max-active: 100
+          max-idle: 20
+          min-idle: 10
+          max-wait: 3000ms
+          time-between-eviction-runs: 10s
+  jackson:
+    default-property-inclusion: non_null # JSON?????????
+  mybatis-plus:
+    type-aliases-package: com.example.demo.entity # ?????
+logging:
+  level:
+    com.example.demo: debug
+app:
+  cache:
+    db-fallback-max-concurrency: 20
